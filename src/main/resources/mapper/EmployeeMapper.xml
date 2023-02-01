@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mybatis_crud.repository.EmployeeRepository">
+
+    <resultMap id="employeeMap" type="Employee">
+            <id property="id" column="id"/>
+            <result property="firstName" column="first_name"/>
+            <result property="lastName" column="last_name"/>
+            <result property="emailId" column="email_address"/>
+    </resultMap>
+
+    <select id="findAll" resultType="com.example.mybatis_crud.model.Employee" resultMap="employeeMap">
+        select * from Employees
+    </select>
+
+    <select id="getEmployee" resultType="com.example.mybatis_crud.model.Employee" resultMap="employeeMap">
+        select * from Employees where id = #{value}
+    </select>
+
+    <select id="findAllByFilter" resultType="com.example.mybatis_crud.model.Employee" parameterType="map" resultMap="employeeMap">
+        select * from Employees
+        <where>
+            <if test="id != null   and id != '-1' " > and id = #{id} </if>
+            <if test="firstName != null and firstName != ''">and first_name = #{firstName}</if>
+            <if test="lastName != null and lastName != ''">and last_name = #{lastName}</if>
+            <if test="emailId != null and emailId != ''">and email_address = #{emailId}</if>
+        </where>
+        <choose>
+            <when test="sort != null or sort.trim() != ''">
+                ORDER BY ${sort} ${order}
+            </when>
+            <otherwise>
+                ORDER BY id DESC
+            </otherwise>
+        </choose>
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+
+    <insert id="saveEmployee" parameterType="com.example.mybatis_crud.model.Employee" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `employees` (`first_name`, `last_name`, `email_address`) VALUES (#{firstName},#{lastName},#{emailId})
+    </insert>
+
+    <update id="updateEmployee" parameterType="map">
+        update `employees`
+        <set>
+            <if test="firstName != null">`first_name` = #{firstName}, </if>
+            <if test="lastName != null">`last_name` = #{lastName}, </if>
+            <if test="emailId != null">`email_address` = #{emailId}, </if>
+        </set>
+        where `id` = #{id}
+    </update>
+
+    <delete id="deleteEmployee">
+        delete from employees where id = #{id}
+    </delete>
+
+    <delete id="batchRemove">
+        delete from employees where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

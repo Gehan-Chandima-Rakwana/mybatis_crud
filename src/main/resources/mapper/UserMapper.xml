@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mybatis_crud.repository.UserRepository">
+
+    <resultMap type='User' id='UserResult'>
+        <id property='userId' column='user_id'/>
+        <result property='emailId' column='email_id'/>
+        <result property='password' column='password'/>
+        <result property='firstName' column='first_name'/>
+        <result property='lastName' column='last_name'/>
+        <association property='blog' resultMap='BlogResult'/>
+    </resultMap>
+
+<!--    *-has-One Relation Mapping with User And Blog-->
+    <resultMap type='Blog' id='BlogResult'>
+        <id property='blogId' column='blog_id'/>
+        <result property='blogName' column='BLOG_NAME'/>
+        <result property='createdOn' column='CREATED_ON'/>
+    </resultMap>
+
+    <select id='getUserById' parameterType='int' resultMap='UserResult'>
+        SELECT
+        U.USER_ID, U.EMAIL_ID, U.PASSWORD, U.FIRST_NAME, U.LAST_NAME,
+        B.BLOG_ID, B.BLOG_NAME, B.CREATED_ON
+        FROM USER U LEFT OUTER JOIN BLOG B ON U.BLOG_ID=B.BLOG_ID
+        WHERE U.USER_ID = #{userId}
+    </select>
+
+    <select id='findAll' resultMap='UserResult'>
+        SELECT
+        U.USER_ID, U.EMAIL_ID, U.PASSWORD, U.FIRST_NAME, U.LAST_NAME,
+        B.BLOG_ID, B.BLOG_NAME, B.CREATED_ON
+        FROM USER U LEFT OUTER JOIN BLOG B ON U.BLOG_ID=B.BLOG_ID
+    </select>
+
+    <select id="findAllByFilter" resultMap="UserResult" parameterType="map">
+        select * from `user` left join `blog` on user.blog_id = blog.blog_id
+        <where>
+            <if test="userId != null and userId != ''">and user_id = #{userId}</if>
+            <if test="firstName != null and firstName != ''">and first_name =#{firstName}</if>
+        </where>
+        <choose>
+            <when test="sort != null and order != null">
+                order by #{sort} #{order}
+            </when>
+            <otherwise>
+                order by user_id asc
+            </otherwise>
+        </choose>
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+</mapper>

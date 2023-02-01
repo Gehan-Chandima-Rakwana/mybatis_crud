@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mybatis_crud.repository.BlogRepository">
+
+    <resultMap type='Blog' id='BlogResult'>
+        <id property='blogId' column='blog_id'/>
+        <result property='blogName' column='BLOG_NAME'/>
+        <result property='createdOn' column='CREATED_ON'/>
+        <collection property='posts' ofType='Post' resultMap='PostResult' columnPrefix='post_'></collection>
+    </resultMap>
+
+<!--    One-To-Many Relationship With Blog And Post Details-->
+    <resultMap type='Post' id='PostResult'>
+        <id property='postId' column='post_id'/>
+        <result property='title' column='title'/>
+        <result property='content' column='content'/>
+        <result property='createdOn' column='created_on'/>
+    </resultMap>
+
+    <select id='getBlogById' parameterType='int' resultMap='BlogResult'>
+        SELECT
+        b.blog_id, b.blog_name, b.created_on,
+        p.post_id as post_post_id, p.title as post_title, p.content as post_content, p.created_on as post_created_on
+        FROM blog b left outer join post p on b.blog_id=p.blog_id
+        WHERE b.BLOG_ID=#{blogId}
+    </select>
+
+    <select id='findAll' resultMap='BlogResult'>
+        SELECT
+        b.blog_id, b.blog_name, b.created_on as blog_created_on,
+        p.post_id as post_post_id, p.title as post_title, p.content as post_content, p.created_on as post_created_on
+        FROM blog b left outer join post p on b.blog_id=p.blog_id
+    </select>
+
+    <select id="findAllByFilter" resultMap="BlogResult" parameterType="map">
+        select * from `blog` left join `post` on blog.blog_id = post.blog_id
+        <where>
+            <if test="blogId != null and blogId != ''">and blogId = #{blog_id}</if>
+            <if test="blogName != null and blogName != ''">and blogName =#{blog_name}</if>
+        </where>
+        <choose>
+            <when test="sort != null and order != null">
+                order by #{sort} #{order}
+            </when>
+            <otherwise>
+                order by user_id asc
+            </otherwise>
+        </choose>
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,23 @@
+
+server:
+  port: 8086
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:/**/*Mapper.xml
+  type-aliases-package: com.example.**.model
+
+logging:
+  level:
+    root: info
+    com:
+      demo:
+        mapper: debug
+
+
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo?useSSL=false&useUnicode=true&characterEncoding=utf8
+    username: root
+    password:
